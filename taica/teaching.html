@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3 分鐘看懂台灣歷史 | 教學型 HTML 簡報</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --slide-bg: #ffffff;
+      --primary: #0284c7;
+      --primary-soft: #e0f2fe;
+      --accent: #d97706;
+      --accent-soft: #fef3c7;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Top Control Bar */
+    header {
+      height: 54px;
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #334155;
+      font-size: 0.9rem;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .badge-wiki {
+      background: #0369a1;
+      color: #e0f2fe;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+    .controls { display: flex; align-items: center; gap: 10px; }
+    button.nav-btn {
+      background: #334155;
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.15s;
+    }
+    button.nav-btn:hover:not(:disabled) { background: var(--primary); }
+    button.nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    select.slide-select {
+      background: #0f172a;
+      color: #e2e8f0;
+      border: 1px solid #475569;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    /* Progress Bar */
+    .progress-track {
+      height: 4px;
+      background: #334155;
+      width: 100%;
+    }
+    .progress-fill {
+      height: 100%;
+      background: #38bdf8;
+      width: 12.5%;
+      transition: width 0.25s ease;
+    }
+
+    /* Slide Viewport */
+    .stage {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .slide {
+      width: 100%;
+      max-width: 1040px;
+      height: 100%;
+      max-height: 620px;
+      background: var(--slide-bg);
+      border-radius: 16px;
+      padding: 44px 56px 32px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      animation: fadeIn 0.25s ease;
+    }
+    .slide.active { display: flex; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cover Slide */
+    .slide.cover {
+      background: linear-gradient(135deg, #0f172a 0%, #0369a1 100%);
+      color: #ffffff;
+      justify-content: center;
+      text-align: left;
+    }
+    .cover .kicker {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.16);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      margin-bottom: 18px;
+      width: fit-content;
+    }
+    .cover h1 {
+      font-size: 2.8rem;
+      line-height: 1.25;
+      margin-bottom: 16px;
+    }
+    .cover p.subtitle {
+      font-size: 1.2rem;
+      color: #bae6fd;
+      max-width: 720px;
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+    .cover .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      max-width: 760px;
+    }
+    .cover .meta-box {
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+    }
+
+    /* Content Slide Structure */
+    .slide-header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+    .step-tag {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+    }
+    .slide-header h2 {
+      font-size: 1.85rem;
+      color: #0f172a;
+    }
+    .concept-banner {
+      background: var(--primary-soft);
+      border-left: 5px solid var(--primary);
+      padding: 12px 18px;
+      border-radius: 0 8px 8px 0;
+      font-size: 1.05rem;
+      color: #0c4a6e;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      flex: 1;
+      align-items: start;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      flex: 1;
+      align-items: stretch;
+    }
+    .card {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      height: 100%;
+    }
+    .card h3 {
+      font-size: 1.1rem;
+      color: var(--primary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card p, .card li {
+      font-size: 0.96rem;
+      line-height: 1.6;
+      color: #334155;
+    }
+    .card ul { padding-left: 18px; display: flex; flex-direction: column; gap: 8px; }
+
+    /* Summary Table */
+    table.summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    table.summary-table th, table.summary-table td {
+      border: 1px solid var(--border);
+      padding: 10px 14px;
+      text-align: left;
+    }
+    table.summary-table th {
+      background: #0f172a;
+      color: #fff;
+    }
+    table.summary-table tr:nth-child(even) { background: #f8fafc; }
+
+    /* Slide Footer (Provenance Citation) */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      margin-top: 16px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .citation-pill {
+      background: var(--accent-soft);
+      color: #b45309;
+      font-family: monospace;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #fde68a;
+    }
+    .cover .slide-footer {
+      border-top-color: rgba(255,255,255,0.2);
+      color: #bae6fd;
+      position: absolute;
+      bottom: 24px;
+      left: 56px;
+      right: 56px;
+    }
+
+    @media (max-width: 840px) {
+      .slide { padding: 24px; max-height: none; overflow-y: auto; }
+      .grid-2, .grid-3, .cover .meta-grid { grid-template-columns: 1fr; }
+      .cover h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <strong>🇹🇼 台灣歷史教學簡報</strong>
+      <span class="badge-wiki">Knowledge Source: TaiwanHistory-Wiki</span>
+    </div>
+    <div class="controls">
+      <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">← 上一頁</button>
+      <select class="slide-select" id="slideSelect" onchange="goToSlide(Number(this.value))"></select>
+      <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">下一頁 →</button>
+    </div>
+  </header>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+  <main class="stage">
+    <!-- Slide 1: Cover -->
+    <section class="slide cover active" data-title="01. 封面：3 分鐘看懂台灣歷史">
+      <div>
+        <span class="kicker">入門教學簡報 · 基於 LLM Wiki 結構化知識庫生成</span>
+        <h1>從海洋十字路口<br/>到多元民主島嶼</h1>
+        <p class="subtitle">給初學者的台灣歷史導覽：不背死板年份，用「海洋連結、政權交會、現代轉型」三條主線一次讀懂四百年脈絡。</p>
+        <div class="meta-grid">
+          <div class="meta-box"><strong>🎯 學習目標</strong><br/>建立台灣史五大時期的完整時間軸概念</div>
+          <div class="meta-box"><strong>📚 知識來源</strong><br/>TaiwanHistory-Wiki（WIKI-00 ~ WIKI-05）</div>
+          <div class="meta-box"><strong>⌨️ 操作提示</strong><br/>使用鍵盤 ← → 方向鍵或上方按鈕翻頁</div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Slide 1 / 8</span>
+        <span>引用知識庫：WIKI-00_Index_台灣歷史總覽</span>
+      </div>
+    </section>
+
+    <!-- Slide 2: Big Picture -->
+    <section class="slide" data-title="02. 學習地圖：看懂台灣史的三把鑰匙">
+      <div>
+        <div class="slide-header">
+          <div class="step-tag">Concept Map · 建立全局觀</div>
+          <h2>先別急著背年代！看懂台灣歷史的三把鑰匙</h2>
+        </div>
+        <div class="concept-banner">
+          <strong>一句話理解台灣史：</strong>台灣位於東亞島弧中心，因為地理位置關鍵，先後吸引不同海洋勢力與移民到來，層層疊加出今日的多元面貌。
+        </div>
+        <div class="grid-3">
+          <div class="card">
+            <h3>🌊 鑰匙一：海洋連結</h3>
+            <p>台灣不是封閉孤島。從五千年前南島語族向太平洋航行，到 17 世紀成為東亞轉口貿易中心，海洋始終是台灣連結世界的舞台。</p>
+          </div>
+          <div class="card">
+            <h3>🏛️ 鑰匙二：多層次政權</h3>
+            <p>原住民族、荷蘭、西班牙、明鄭、清帝國、日本到中華民國，不同統治者帶來各自的文化、文字與制度，形成獨特的歷史疊層。</p>
+          </div>
+          <div class="card">
+            <h3>🚀 鑰匙三：現代化與民主</h3>
+            <p>從清末開港、日治基礎建設，到戰後經濟奇蹟（十大建設、半導體）與 1987 年解嚴後的和平政黨輪替，完成現代公民社會轉型。</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Slide 2 / 8</span>
+        <span class="citation-pill">來源引用：WIKI-00（00_Index_台灣歷史總覽）</span>
+      </div>
+    </section>
+
+    <!-- Slide 3: Prehistory & Austronesian -->
+    <section class="slide" data-title="03. 第一階段：史前時代與南島語族">
+      <div>
+        <div class="slide-header">
+          <div class="step-tag">Era 1 · 約 30,000 年前 – 1624 年前</div>
+          <h2>史前時代與南島語族：太平洋航海文明的起點</h2>
+        </div>
+        <div class="concept-banner">
+          <strong>核心概念：</strong>在文字紀錄出現之前，台灣不僅已有數萬年人類活動，更極可能是遍布太平洋與印度洋「南島語族」的擴散原鄉。
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>🏺 三大史前文化演進</h3>
+            <ul>
+              <li><strong>舊石器（長濱文化）</strong>：約 3 萬年前，台東八仙洞，已知用火與打製石器。</li>
+              <li><strong>新石器（卑南文化）</strong>：出現農耕、陶器與精美玉器，顯示已有社會分工。</li>
+              <li><strong>金屬器（十三行文化）</strong>：約 1,800 年前，淡水河口，已會煉鐵並與海外貿易。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>⛵ 為什麼台灣對世界史很重要？</h3>
+            <ul>
+              <li><strong>Out of Taiwan 假說</strong>：台灣原住民族屬於「南島語系」，語言多樣性最高。</li>
+              <li><strong>跨洋大遷徙起點</strong>：學者推測約 5 千年前，南島語族從台灣出發，向南擴散至菲律賓、印尼、紐西蘭，最遠抵達馬達加斯加與復活節島。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Slide 3 / 8</span>
+        <span class="citation-pill">來源引用：WIKI-01（01_史前時代與南島語族）</span>
+      </div>
+    </section>
+
+    <!-- Slide 4: Age of Discovery -->
+    <section class="slide" data-title="04. 第二階段：大航海時代與荷西鄭氏">
+      <div>
+        <div class="slide-header">
+          <div class="step-tag">Era 2 · 1624 年 – 1683 年</div>
+          <h2>大航海時代與荷西鄭氏：躍上全球貿易舞台</h2>
+        </div>
+        <div class="concept-banner">
+          <strong>核心概念：</strong>17 世紀歐洲海權來到東亞，台灣正式被捲入全球貿易網；隨後鄭成功建立漢人政權，大幅改變人口結構。
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>🇪🇺 荷蘭與西班牙的競爭（1624–1662）</h3>
+            <ul>
+              <li><strong>荷蘭東印度公司（南部）</strong>：以台南安平為基地，出口鹿皮與蔗糖，引進漢人開墾，並用羅馬拼音創制「新港文書」向原住民傳教。</li>
+              <li><strong>西班牙（北部）</strong>：佔領基隆與淡水進行貿易，1642 年被荷蘭軍隊驅逐。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>⚔️ 明鄭時期的拓墾（1661–1683）</h3>
+            <ul>
+              <li><strong>第一個漢人政權</strong>：1661 年鄭成功登陸鹿耳門，隔年擊敗荷蘭人。</li>
+              <li><strong>制度與人口轉變</strong>：推行「寓兵於農」屯田開墾，設立孔廟與官學，漢人移民數量在此時期正式超越原住民族。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Slide 4 / 8</span>
+        <span class="citation-pill">來源引用：WIKI-02（02_大航海時代與荷西鄭氏時期）</span>
+      </div>
+    </section>
+
+    <!-- Slide 5: Qing Empire -->
+    <section class="slide" data-title="05. 第三階段：清帝國統治時期">
+      <div>
+        <div class="slide-header">
+          <div class="step-tag">Era 3 · 1683 年 – 1895 年</div>
+          <h2>清帝國統治時期：從消極防範到開港現代化</h2>
+        </div>
+        <div class="concept-banner">
+          <strong>核心概念：</strong>清廷統治台灣 212 年，前 180 年採取「為防台而治台」的消極管制，直到 1860 年代開港通商與外患刺激後才轉為積極建設。
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>🚧 前期：移民社會的衝突與活力</h3>
+            <ul>
+              <li><strong>渡台禁令</strong>：限制漢人攜眷渡台，但閩粵移民仍冒險橫渡黑水溝開墾。</li>
+              <li><strong>三年一小反、五年一大反</strong>：早期因族群（閩粵、漳泉）械鬥與官吏貪腐，民變事件頻繁。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>🚢 後期：開港貿易與建省新政</h3>
+            <ul>
+              <li><strong>1860s 開港通商</strong>：安平、淡水、打狗、雞籠開港，<strong>茶葉、樟腦、蔗糖</strong>外銷全球，經濟重心北移。</li>
+              <li><strong>1885 台灣建省</strong>：沈葆楨加強海防；首任巡撫劉銘傳建鐵路、架電報線，啟動早期現代化。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Slide 5 / 8</span>
+        <span class="citation-pill">來源引用：WIKI-03（03_清帝國統治時期）</span>
+      </div>
+    </section>
+
+    <!-- Slide 6: Japanese Rule -->
+    <section class="slide" data-title="06. 第四階段：日本殖民統治時期">
+      <div>
+        <div class="slide-header">
+          <div class="step-tag">Era 4 · 1895 年 – 1945 年</div>
+          <h2>日本殖民統治時期：基礎建設與民主文化啟蒙</h2>
+        </div>
+        <div class="concept-banner">
+          <strong>核心概念：</strong>《馬關條約》割台後，總督府在建立嚴密殖民控制體制的同時，也推動現代基礎建設，並激發知識分子的自治意識。
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>🏗️ 殖民體制與基礎建設</h3>
+            <ul>
+              <li><strong>抗日歷程</strong>：1895 台灣民主國到 1915 噍吧哖事件，以及 1930 年原住民霧社事件。</li>
+              <li><strong>現代化建設</strong>：完成人口普查、統一貨幣度量衡、縱貫鐵路與八田與一設計的「嘉南大圳」，發展糖業與稻米經濟。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>💡 1920 年代民主與文化啟蒙</h3>
+            <ul>
+              <li><strong>非武裝政治運動</strong>：林獻堂、蔣渭水等人成立「台灣文化協會」，推廣新知。</li>
+              <li><strong>議會設置請願運動</strong>：透過合法請願爭取台灣人政治參與權，種下現代公民意識的種子。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Slide 6 / 8</span>
+        <span class="citation-pill">來源引用：WIKI-04（04_日本殖民統治時期）</span>
+      </div>
+    </section>
+
+    <!-- Slide 7: Post-War & Democratization -->
+    <section class="slide" data-title="07. 第五階段：戰後與當代民主化">
+      <div>
+        <div class="slide-header">
+          <div class="step-tag">Era 5 · 1945 年 – 2026 年</div>
+          <h2>戰後與當代民主化：經濟奇蹟與公民社會誕生</h2>
+        </div>
+        <div class="concept-banner">
+          <strong>核心概念：</strong>二戰後台灣走過二二八事件與 38 年戒嚴的威權歲月，在創造經濟奇蹟的同時，透過民間努力完成和平民主轉型。
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>📈 威權治理與台灣經濟奇蹟</h3>
+            <ul>
+              <li><strong>二二八與戒嚴（1947–1987）</strong>：戰後治理衝突引發二二八事件，1949 年後實施長達 38 年戒嚴。</li>
+              <li><strong>產業升級</strong>：從土地改革、加工出口區、十大建設，到 1980 年代新竹科學園區，奠定全球半導體重鎮地位。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>🗳️ 解嚴與和平民主轉型</h3>
+            <ul>
+              <li><strong>1987 年解除戒嚴</strong>：經歷美麗島事件與黨外運動爭取，正式開放黨禁與報禁。</li>
+              <li><strong>民主深化</strong>：1996 年首次總統直選、2000 年首度和平政黨輪替，成為亞洲多元民主代表。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Slide 7 / 8</span>
+        <span class="citation-pill">來源引用：WIKI-05（05_戰後與當代民主化）</span>
+      </div>
+    </section>
+
+    <!-- Slide 8: Summary & Knowledge Traceability -->
+    <section class="slide" data-title="08. 總結：台灣歷史演進速查表">
+      <div>
+        <div class="slide-header">
+          <div class="step-tag">Recap · 知識結構總複習</div>
+          <h2>一表複習：台灣歷史五大時期與核心特徵</h2>
+        </div>
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>歷史時期</th>
+              <th>時間跨度</th>
+              <th>關鍵轉折與特色</th>
+              <th>對應 Wiki 條目</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. 史前與南島</strong></td>
+              <td>30,000 年前–1624</td>
+              <td>長濱/卑南/十三行文化；南島語族擴散起點</td>
+              <td><code>WIKI-01</code></td>
+            </tr>
+            <tr>
+              <td><strong>2. 荷西與明鄭</strong></td>
+              <td>1624 – 1683</td>
+              <td>納入全球貿易網；鄭成功建立首個漢人政權</td>
+              <td><code>WIKI-02</code></td>
+            </tr>
+            <tr>
+              <td><strong>3. 清帝國時期</strong></td>
+              <td>1683 – 1895</td>
+              <td>前期渡台禁令；1860s 開港茶糖樟腦外銷；1885 建省</td>
+              <td><code>WIKI-03</code></td>
+            </tr>
+            <tr>
+              <td><strong>4. 日本殖民時期</strong></td>
+              <td>1895 – 1945</td>
+              <td>縱貫鐵路與嘉南大圳；1920s 台灣文化協會民主啟蒙</td>
+              <td><code>WIKI-04</code></td>
+            </tr>
+            <tr>
+              <td><strong>5. 戰後與當代</strong></td>
+              <td>1945 – 2026</td>
+              <td>戒嚴到 1987 解嚴；十大建設與半導體；和平政黨輪替</td>
+              <td><code>WIKI-05</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="slide-footer">
+        <span>Slide 8 / 8 · 簡報結束</span>
+        <span class="citation-pill">完整溯源：WIKI-00 ~ WIKI-05</span>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const slideSelect = document.getElementById("slideSelect");
+    const progressFill = document.getElementById("progressFill");
+    let currentIdx = 0;
+
+    // Populate dropdown
+    slides.forEach((slide, idx) => {
+      const opt = document.createElement("option");
+      opt.value = idx;
+      opt.textContent = slide.dataset.title || `Slide ${idx + 1}`;
+      slideSelect.appendChild(opt);
+    });
+
+    function updateUI() {
+      slides.forEach((s, idx) => s.classList.toggle("active", idx === currentIdx));
+      slideSelect.value = currentIdx;
+      prevBtn.disabled = currentIdx === 0;
+      nextBtn.disabled = currentIdx === slides.length - 1;
+      progressFill.style.width = `${((currentIdx + 1) / slides.length) * 100}%`;
+    }
+
+    function changeSlide(delta) {
+      const next = currentIdx + delta;
+      if (next >= 0 && next < slides.length) {
+        currentIdx = next;
+        updateUI();
+      }
+    }
+
+    function goToSlide(idx) {
+      if (idx >= 0 && idx < slides.length) {
+        currentIdx = idx;
+        updateUI();
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === " ") {
+        e.preventDefault();
+        changeSlide(1);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        changeSlide(-1);
+      }
+    });
+
+    updateUI();
+  </script>
+</body>
+</html>

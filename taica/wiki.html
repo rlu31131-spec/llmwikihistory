@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaiwanHistory-Wiki | 台灣歷史 LLM 知識庫</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --sidebar-bg: #0f172a;
+      --sidebar-text: #e2e8f0;
+      --card-bg: #ffffff;
+      --primary: #0284c7;
+      --primary-light: #e0f2fe;
+      --accent: #d97706;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+    }
+    /* Sidebar */
+    aside {
+      width: 300px;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      padding: 24px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .brand {
+      border-bottom: 1px solid #334155;
+      padding-bottom: 14px;
+    }
+    .brand h1 { font-size: 1.2rem; color: #38bdf8; letter-spacing: 0.5px; }
+    .brand p { font-size: 0.8rem; color: #94a3b8; margin-top: 4px; }
+    .search-box input {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      background: #1e293b;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+    .search-box input:focus { outline: 2px solid #38bdf8; }
+    .nav-section-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #94a3b8;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .nav-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .nav-item {
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-size: 0.92rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .nav-item:hover { background: #1e293b; }
+    .nav-item.active { background: var(--primary); color: #fff; font-weight: 600; }
+    .nav-item .meta { font-size: 0.75rem; opacity: 0.8; }
+    .tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag-chip {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #1e293b;
+      color: #cbd5e1;
+      cursor: pointer;
+      border: 1px solid #334155;
+    }
+    .tag-chip.active, .tag-chip:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    /* Main Content */
+    main {
+      flex: 1;
+      padding: 36px 48px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+    .article-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px 36px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+    }
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .wiki-id {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: monospace;
+    }
+    .era-badge {
+      background: #fef3c7;
+      color: #b45309;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    h2.article-title {
+      font-size: 1.75rem;
+      margin-bottom: 16px;
+      color: #0f172a;
+      line-height: 1.3;
+    }
+    .tldr-box {
+      background: #f1f5f9;
+      border-left: 4px solid var(--primary);
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 24px;
+      font-size: 0.98rem;
+      line-height: 1.6;
+    }
+    .tldr-box strong { color: var(--primary); }
+    h3 {
+      font-size: 1.15rem;
+      margin: 22px 0 10px;
+      color: #0f172a;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+    }
+    ul.fact-list {
+      padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      line-height: 1.65;
+    }
+    .source-box {
+      margin-top: 24px;
+      padding: 12px 16px;
+      background: #fafafa;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .xref-section {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+    .xref-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .wiki-link {
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      cursor: pointer;
+      font-family: monospace;
+      transition: all 0.15s;
+    }
+    .wiki-link:hover { background: #1d4ed8; color: #fff; }
+    @media (max-width: 820px) {
+      body { flex-direction: column; }
+      aside { width: 100%; height: auto; position: static; }
+      main { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <aside>
+    <div class="brand">
+      <h1>📚 TaiwanHistory-Wiki</h1>
+      <p>LLM Wiki 結構化知識庫（1 索引 + 5 篇 Ingest）</p>
+    </div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="搜尋關鍵字、年代、事件..." />
+    </div>
+    <div>
+      <div class="nav-section-title">知識庫條目 (Articles)</div>
+      <ul class="nav-list" id="navList"></ul>
+    </div>
+    <div>
+      <div class="nav-section-title">主題標籤過濾 (Tags)</div>
+      <div class="tag-cloud" id="tagCloud"></div>
+    </div>
+  </aside>
+
+  <main>
+    <article class="article-card" id="articleView"></article>
+  </main>
+
+  <script>
+    const wikiData = [
+      {
+        id: "WIKI-00",
+        slug: "00_Index_台灣歷史總覽",
+        title: "台灣歷史總覽：從海洋十字路口到多元民主島嶼",
+        era: "史前至今（約 30,000 年前 – 2026）",
+        tags: ["#總覽索引", "#海洋貿易", "#政權更迭", "#多元族群"],
+        tldr: "台灣位於東亞島弧中心，四百年來經歷原住民族、荷西、明鄭、清帝國、日本與中華民國等多元政權交會，形塑出兼具海洋貿易性格、移民社會韌性與現代民主制度的獨特歷史脈絡。",
+        facts: [
+          "<strong>核心主軸一（海洋連結）</strong>：台灣並非孤立海島，而是南島語族向太平洋擴散的起點，也是 17 世紀大航海時代東亞貿易的核心轉運站。",
+          "<strong>核心主軸二（多層次政權與移民）</strong>：不同時期的統治者帶來各自的文化、法律與建設，使台灣累積了南島、漢文化、日本與西方現代制度的複合底蘊。",
+          "<strong>核心主軸三（現代化與民主轉型）</strong>：從戰後威權體制與出口導向經濟奇蹟（十大建設、半導體產業），一步步走向 1987 年解嚴與和平政黨輪替。",
+          "<strong>知識庫使用規範</strong>：本 Wiki 收錄 5 篇核心時期 Ingest 資料（WIKI-01 至 WIKI-05），所有教學簡報的歷史事實、年代與因果推論皆必須溯源至此知識庫。"
+        ],
+        source: "Ingest 來源 #0：Wiki Schema 總綱與台灣史時間軸架構定義",
+        xrefs: ["WIKI-01", "WIKI-02", "WIKI-03", "WIKI-04", "WIKI-05"]
+      },
+      {
+        id: "WIKI-01",
+        slug: "01_史前時代與南島語族",
+        title: "史前時代與南島語族：太平洋航海文明的起點",
+        era: "約 30,000 年前 – 1624 年前",
+        tags: ["#史前文化", "#南島語族", "#多元族群"],
+        tldr: "在文字記載出現前，台灣已有長達數萬年的人類活動史；語言學與考古學證據更指出，台灣極可能是遍布太平洋與印度洋的「南島語族」擴散原鄉。",
+        facts: [
+          "<strong>舊石器時代（長濱文化）</strong>：距今約 3 萬至 5 千年前，分布於台東長濱八仙洞一帶，已知用火與製作打製石器，採集與漁獵維生。",
+          "<strong>新石器時代（大坌坑、卑南文化）</strong>：距今約 7 千至 2 千年前，出現磨製石器、繩紋陶與原始農耕；台東卑南遺址出土大量石板棺與精美玉器，顯示已有社會分工與貿易。",
+          "<strong>金屬器時代（十三行文化）</strong>：距今約 1,800 年前，分布於淡水河口，已掌握煉鐵技術，並出土中國銅錢與玻璃珠，證明當時已與海外進行貿易交換。",
+          "<strong>南島語族擴散（Out of Taiwan 假說）</strong>：台灣原住民族屬於南島語系，語言多樣性最高，學者推測約 5 千年前南島語族從台灣出發，向南擴散至菲律賓、印尼、紐西蘭乃至馬達加斯加與復活節島。"
+        ],
+        source: "Ingest 來源 #1：《台灣史前考古與南島語族擴散研究摘要》",
+        xrefs: ["WIKI-00", "WIKI-02"]
+      },
+      {
+        id: "WIKI-02",
+        slug: "02_大航海時代與荷西鄭氏時期",
+        title: "大航海時代與荷西鄭氏時期：躍上世界貿易舞台",
+        era: "1624 年 – 1683 年",
+        tags: ["#海洋貿易", "#政權更迭", "#多元族群"],
+        tldr: "17 世紀歐洲海權進入東亞，荷蘭與西班牙先後在台灣建立據點，使台灣成為全球貿易網絡的轉運樞紐；隨後鄭成功驅逐荷蘭，開啟漢人政權大規模拓墾的序幕。",
+        facts: [
+          "<strong>荷蘭東印度公司（VOC，1624–1662）</strong>：以台南安平（熱蘭遮城）為中心，將台灣作為對中國、日本與東南亞的轉口貿易基地，輸出鹿皮與蔗糖，並引進漢人勞動力開墾，同時創制「新港文書」向西拉雅族傳教。",
+          "<strong>西班牙佔領北台灣（1626–1642）</strong>：為抗衡荷蘭，西班牙佔領基隆（聖薩爾瓦多城）與淡水（紅毛城），進行傳教與硫磺貿易，後於 1642 年被荷蘭軍隊驅逐。",
+          "<strong>明鄭時期（1661–1683）</strong>：1661 年鄭成功登陸鹿耳門，翌年擊敗荷蘭人，建立台灣第一個漢人政權（東寧王國）；實施「寓兵於農」屯田制度，建立孔廟與官學，漢人人口大幅超越原住民族。"
+        ],
+        source: "Ingest 來源 #2：《17世紀東亞海域與福爾摩沙貿易史料彙編》",
+        xrefs: ["WIKI-00", "WIKI-01", "WIKI-03"]
+      },
+      {
+        id: "WIKI-03",
+        slug: "03_清帝國統治時期",
+        title: "清帝國統治時期：從消極防範到開港現代化",
+        era: "1683 年 – 1895 年",
+        tags: ["#移民社會", "#海洋貿易", "#現代化轉型"],
+        tldr: "清帝國統治台灣長達 212 年，前期採取「為防台而治台」的消極政策；直到 1860 年代開港通商與外患刺激後，才轉向積極建設，並於 1885 年正式建省。",
+        facts: [
+          "<strong>前期消極治台與移民社會（1683–1860）</strong>：清廷頒布「渡台禁令」限制漢人攜眷渡台，但閩粵移民仍冒險橫渡黑水溝；早期因族群（閩粵、漳泉）械鬥與官逼民反頻繁，有「三年一小反、五年一大反」之稱。",
+          "<strong>開港通商與經濟轉型（1860 年代）</strong>：英法聯軍後，安平、淡水、打狗（高雄）、雞籠（基隆）陸續開港，台灣茶葉、樟腦與蔗糖躍升為國際重要出口商品，經濟重心逐漸北移。",
+          "<strong>自強新政與台灣建省（1874–1895）</strong>：1874 年牡丹社事件後，沈葆楨推動開山撫番與加強海防；1885 年台灣建省，首任巡撫劉銘傳修築基隆至新竹鐵路、架設電報線與設立新式學堂，奠定早期現代化基礎。"
+        ],
+        source: "Ingest 來源 #3：《清代台灣社會變遷與開港後現代化進程》",
+        xrefs: ["WIKI-00", "WIKI-02", "WIKI-04"]
+      },
+      {
+        id: "WIKI-04",
+        slug: "04_日本殖民統治時期",
+        title: "日本殖民統治時期：基礎建設與民主文化啟蒙",
+        era: "1895 年 – 1945 年",
+        tags: ["#現代化轉型", "#政權更迭", "#民主啟蒙"],
+        tldr: "1895 年《馬關條約》將台灣割讓給日本。總督府在建立嚴密警察與保甲控制體制的同時，也推動人口普查、交通水利建設與現代教育，並激發台灣知識分子的自治與文化運動。",
+        facts: [
+          "<strong>政權轉折與武裝抗日（1895–1915）</strong>：1895 年台灣士紳成立「台灣民主國」抗日失敗，隨後各地武裝抗日持續二十年，直到 1915 年噍吧哖事件後轉為非武裝政治運動；原住民族則於 1930 年爆發震撼的「霧社事件」。",
+          "<strong>基礎建設與產業發展</strong>：總督府完成土地與人口調查、統一貨幣與度量衡，興建縱貫鐵路、基隆與高雄港，並由八田與一設計「嘉南大圳」，使台灣成為「工業日本、農業台灣」的糧食與糖業基地。",
+          "<strong>1920 年代文化啟蒙與議會請願</strong>：林獻堂、蔣渭水等人成立「台灣文化協會」，推動新文化運動並發起「台灣議會設置請願運動」，爭取台灣人的政治參與權與現代公民意識。"
+        ],
+        source: "Ingest 來源 #4：《日治時期台灣基礎建設與社會運動紀要》",
+        xrefs: ["WIKI-00", "WIKI-03", "WIKI-05"]
+      },
+      {
+        id: "WIKI-05",
+        slug: "05_戰後與當代民主化",
+        title: "戰後與當代民主化：經濟奇蹟與公民社會誕生",
+        era: "1945 年 – 2026 年",
+        tags: ["#現代化轉型", "#民主啟蒙", "#多元族群"],
+        tldr: "二戰結束後台灣進入中華民國體制，歷經二二八事件與長達 38 年的戒嚴時期；在經濟高速成長創造「台灣奇蹟」的同時，民間民主運動最終促成解嚴與和平政黨輪替。",
+        facts: [
+          "<strong>政權接收、二二八事件與戒嚴體制（1945–1987）</strong>：1947 年因官民衝突與治理失當爆發「二二八事件」；1949 年中華民國政府遷台並實施長達 38 年的戒嚴，進入威權統治與白色恐怖時期。",
+          "<strong>土地改革與經濟奇蹟（1950s–1980s）</strong>：透過三七五減租、公地放領與耕者有其田穩定農村，隨後發展加工出口區、推動「十大建設」，並在 1980 年代設立新竹科學園區，奠定今日全球半導體與科技產業的核心地位。",
+          "<strong>解嚴與和平民主轉型（1987 至今）</strong>：經歷美麗島事件與黨外運動爭取，1987 年正式解除戒嚴、開放黨禁報禁；1996 年舉行首次總統直選，2000 年完成首度和平政黨輪替，成為亞洲最具代表性的多元民主社會之一。"
+        ],
+        source: "Ingest 來源 #5：《戰後台灣經濟轉型與民主化歷程綜述》",
+        xrefs: ["WIKI-00", "WIKI-04"]
+      }
+    ];
+
+    let currentId = "WIKI-00";
+    let activeTag = null;
+    let searchQuery = "";
+
+    const navList = document.getElementById("navList");
+    const tagCloud = document.getElementById("tagCloud");
+    const articleView = document.getElementById("articleView");
+    const searchInput = document.getElementById("searchInput");
+
+    function getAllTags() {
+      const set = new Set();
+      wikiData.forEach(item => item.tags.forEach(t => set.add(t)));
+      return Array.from(set);
+    }
+
+    function renderSidebar() {
+      const filtered = wikiData.filter(item => {
+        const matchTag = !activeTag || item.tags.includes(activeTag);
+        const q = searchQuery.trim().toLowerCase();
+        const matchQuery = !q ||
+          item.title.toLowerCase().includes(q) ||
+          item.tldr.toLowerCase().includes(q) ||
+          item.era.toLowerCase().includes(q) ||
+          item.facts.some(f => f.toLowerCase().includes(q));
+        return matchTag && matchQuery;
+      });
+
+      navList.innerHTML = filtered.map(item => `
+        <li class="nav-item ${item.id === currentId ? 'active' : ''}" onclick="selectArticle('${item.id}')">
+          <span>${item.id} · ${item.slug.replace(/^\d+_/, '')}</span>
+          <span class="meta">${item.era}</span>
+        </li>
+      `).join("") || `<li style="color:#94a3b8;font-size:0.85rem;padding:8px;">無符合條件的條目</li>`;
+
+      tagCloud.innerHTML = getAllTags().map(tag => `
+        <span class="tag-chip ${activeTag === tag ? 'active' : ''}" onclick="toggleTag('${tag}')">${tag}</span>
+      `).join("");
+    }
+
+    function renderArticle() {
+      const article = wikiData.find(item => item.id === currentId) || wikiData[0];
+      const xrefButtons = article.xrefs.map(refId => {
+        const target = wikiData.find(w => w.id === refId);
+        return target
+          ? `<button class="wiki-link" onclick="selectArticle('${target.id}')">[[${target.slug}]]</button>`
+          : "";
+      }).join("");
+
+      articleView.innerHTML = `
+        <div class="badge-row">
+          <span class="wiki-id">${article.id}</span>
+          <span class="era-badge">⏳ ${article.era}</span>
+          ${article.tags.map(t => `<span class="wiki-id" style="background:#f1f5f9;color:#475569;">${t}</span>`).join("")}
+        </div>
+        <h2 class="article-title">${article.title}</h2>
+        <div class="tldr-box">
+          <strong>核心概念摘要（TL;DR）：</strong>${article.tldr}
+        </div>
+        <h3>📌 結構化歷史知識要點</h3>
+        <ul class="fact-list">
+          ${article.facts.map(fact => `<li>${fact}</li>`).join("")}
+        </ul>
+        <div class="source-box">
+          📄 <strong>Knowledge Provenance（知識來源追溯）：</strong>${article.source}
+        </div>
+        <div class="xref-section">
+          <div style="font-size:0.88rem;font-weight:600;color:#475569;">🔗 雙向關聯條目（Cross-References）：</div>
+          <div class="xref-links">${xrefButtons}</div>
+        </div>
+      `;
+    }
+
+    function selectArticle(id) {
+      currentId = id;
+      renderSidebar();
+      renderArticle();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function toggleTag(tag) {
+      activeTag = (activeTag === tag) ? null : tag;
+      renderSidebar();
+    }
+
+    searchInput.addEventListener("input", (e) => {
+      searchQuery = e.target.value;
+      renderSidebar();
+    });
+
+    renderSidebar();
+    renderArticle();
+  </script>
+</body>
+</html>
